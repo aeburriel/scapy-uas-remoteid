@@ -403,6 +403,7 @@ class OpenDroneIDPacket(Packet):
 
 class BasicID(OpenDroneIDPacket):
     name = "OpenDroneID Basic-ID"
+    match_subclass = True
     fields_desc = [
         BitField("messageType", 0, 4),
         BitEnumField("protoVersion", 2, 4, _REMOTEID_PROTO_VERSION),
@@ -429,6 +430,7 @@ class BasicID(OpenDroneIDPacket):
 
 class Location(OpenDroneIDPacket):
     name = "OpenDroneID Location"
+    match_subclass = True
     fields_desc = [
         BitField("messageType", 1, 4),
         BitEnumField("protoVersion", 2, 4, _REMOTEID_PROTO_VERSION),
@@ -459,6 +461,7 @@ class Location(OpenDroneIDPacket):
 
 class Authentication(OpenDroneIDPacket):
     name = "OpenDroneID Authentication"
+    match_subclass = True
     fields_desc = [
         BitField("messageType", 2, 4),
         BitEnumField("protoVersion", 2, 4, _REMOTEID_PROTO_VERSION),
@@ -492,6 +495,7 @@ class Authentication(OpenDroneIDPacket):
 
 class SelfID(OpenDroneIDPacket):
     name = "OpenDroneID Self-ID"
+    match_subclass = True
     fields_desc = [
         BitField("messageType", 3, 4),
         BitEnumField("protoVersion", 2, 4, _REMOTEID_PROTO_VERSION),
@@ -503,6 +507,7 @@ class SelfID(OpenDroneIDPacket):
 
 class System(OpenDroneIDPacket):
     name = "OpenDroneID System"
+    match_subclass = True
     fields_desc = [
         BitField("messageType", 4, 4),
         BitEnumField("protoVersion", 2, 4, _REMOTEID_PROTO_VERSION),
@@ -568,6 +573,7 @@ class System(OpenDroneIDPacket):
 
 class OperatorID(OpenDroneIDPacket):
     name = "OpenDroneID Operator-ID"
+    match_subclass = True
     fields_desc = [
         BitField("messageType", 5, 4),
         BitEnumField("protoVersion", 2, 4, _REMOTEID_PROTO_VERSION),
@@ -580,6 +586,7 @@ class OperatorID(OpenDroneIDPacket):
 
 class Unknown(OpenDroneIDPacket):
     name = "OpenDroneID Unparsed"
+    match_subclass = True
     fields_desc = [
         BitField("messageType", 5, 4),
         BitEnumField("protoVersion", 2, 4, _REMOTEID_PROTO_VERSION),
