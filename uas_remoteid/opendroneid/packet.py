@@ -383,8 +383,7 @@ class OpenDroneIDHeader(Packet):
     def dispatch_hook(cls, _pkt=None, *args, **kwargs):
         if _pkt is None:
             return cls
-        messageType = _pkt[0] >> 4
-        return _PARSERS.get(messageType, Unknown)
+        return OpenDroneIDPacket.guess_payload_class(_pkt, args, kwargs)
 
 
 class Bluetooth_OpenDroneID(Packet):
@@ -397,6 +396,22 @@ class Bluetooth_OpenDroneID(Packet):
 
 
 class OpenDroneIDPacket(Packet):
+    _parsers = {}
+
+    @classmethod
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls._parsers[cls.messageType.default] = cls
+
+    @classmethod
+    def guess_payload(cls, payload, **kwargs):
+        return cls.guess_payload_class(payload, **kwargs)(payload)
+
+    @classmethod
+    def guess_payload_class(cls, payload, *args, **kwargs):
+        message_type = payload[0] >> 4
+        return cls._parsers.get(message_type, Unknown)
+
     def extract_padding(self, s):
         return "", s
 
@@ -595,11 +610,6 @@ class Unknown(OpenDroneIDPacket):
     ]
 
 
-def _opendroneid_guess_payload(payload, **kargs):
-    message_type = payload[0] >> 4
-    return _PARSERS.get(message_type, Unknown)(payload)
-
-
 class MessagePack(OpenDroneIDPacket):
     name = "OpenDroneID MessagePack"
     fields_desc = [
@@ -609,18 +619,7 @@ class MessagePack(OpenDroneIDPacket):
         ByteField("length", 25),
         FieldLenField("quantity", None, fmt="B", count_of="data"),
         PacketListField(
-            "data", [], _opendroneid_guess_payload,
+            "data", [], OpenDroneIDPacket.guess_payload,
             count_from=lambda pkt: pkt.quantity
         )
     ]
-
-
-_PARSERS = {
-    0: BasicID,
-    1: Location,
-    2: Authentication,
-    3: SelfID,
-    4: System,
-    5: OperatorID,
-    15: MessagePack
-}
