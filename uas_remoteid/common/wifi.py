@@ -17,7 +17,6 @@
 
 
 from ..opendroneid.packet import (
-    OpenDroneIDHeader,
     OpenDroneIDPacket,
 )
 from scapy.fields import (
@@ -99,13 +98,13 @@ def parse_dot11(dot11: Dot11) -> Optional[OpenDroneIDPacket]:
                     isinstance(subpacket, Dot11NAN_ServiceDescriptorAttribute)
                     and subpacket.serviceID == b"\x88\x69\x19\x9d\x92\x09"
                 ):
-                    return OpenDroneIDHeader(subpacket.info)
+                    return OpenDroneIDPacket(subpacket.info)
         elif isinstance(packet, Dot11EltVendorSpecific):
             # 802.11 beacon
             if (
                 packet.ID == 221
                 and packet.info[0:4] == b"\xfa\x0b\xbc\x0d"
             ):
-                return OpenDroneIDHeader(packet.info[5:])
+                return OpenDroneIDPacket(packet.info[5:])
 
     return None

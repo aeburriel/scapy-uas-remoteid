@@ -376,25 +376,6 @@ _SYSTEM_CLASS_EU = {
 
 # Packets
 
-class OpenDroneIDHeader(Packet):
-    name = "OpenDroneID Header"
-
-    @classmethod
-    def dispatch_hook(cls, _pkt=None, *args, **kwargs):
-        if _pkt is None:
-            return cls
-        return OpenDroneIDPacket.guess_payload_class(_pkt, args, kwargs)
-
-
-class Bluetooth_OpenDroneID(Packet):
-    name = "Bluetooth OpenDroneID"
-    fields_desc = [
-        ByteField("appCode", 0x0d),
-        ByteField("counter", 0),
-        PacketField("info", None, OpenDroneIDHeader)
-    ]
-
-
 class OpenDroneIDPacket(Packet):
     _parsers = {}
 
@@ -402,6 +383,12 @@ class OpenDroneIDPacket(Packet):
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
         cls._parsers[cls.messageType.default] = cls
+
+    @classmethod
+    def dispatch_hook(cls, _pkt=None, *args, **kwargs):
+        if _pkt is None:
+            return cls
+        return OpenDroneIDPacket.guess_payload_class(_pkt, args, kwargs)
 
     @classmethod
     def guess_payload(cls, payload, **kwargs):
@@ -622,4 +609,13 @@ class MessagePack(OpenDroneIDPacket):
             "data", [], OpenDroneIDPacket.guess_payload,
             count_from=lambda pkt: pkt.quantity
         )
+    ]
+
+
+class Bluetooth_OpenDroneID(Packet):
+    name = "Bluetooth OpenDroneID"
+    fields_desc = [
+        ByteField("appCode", 0x0d),
+        ByteField("counter", 0),
+        PacketField("info", None, OpenDroneIDPacket)
     ]
