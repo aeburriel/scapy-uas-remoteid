@@ -377,6 +377,14 @@ _SYSTEM_CLASS_EU = {
 # Packets
 
 class OpenDroneIDPacket(Packet):
+    name = "OpenDroneID"
+    fields_desc = [
+        BitField("messageType", 5, 4),
+        BitEnumField("protoVersion", 2, 4, _REMOTEID_PROTO_VERSION),
+
+        StrFixedLenField("data", "", 24)
+    ]
+
     _parsers = {}
 
     @classmethod
@@ -397,7 +405,7 @@ class OpenDroneIDPacket(Packet):
     @classmethod
     def guess_payload_class(cls, payload, *args, **kwargs):
         message_type = payload[0] >> 4
-        return cls._parsers.get(message_type, Unknown)
+        return cls._parsers.get(message_type, OpenDroneIDPacket)
 
     def extract_padding(self, s):
         return "", s
@@ -583,17 +591,6 @@ class OperatorID(OpenDroneIDPacket):
         ByteEnumField("operatorIdType", 0, _OPERATORID_OPERATORID_TYPE),
         StrFixedLenField("operatorId", "", 20),
         StrFixedLenField("reserved", "", 3)
-    ]
-
-
-class Unknown(OpenDroneIDPacket):
-    name = "OpenDroneID Unparsed"
-    match_subclass = True
-    fields_desc = [
-        BitField("messageType", 5, 4),
-        BitEnumField("protoVersion", 2, 4, _REMOTEID_PROTO_VERSION),
-
-        StrFixedLenField("data", "", 24)
     ]
 
 
