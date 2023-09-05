@@ -16,7 +16,6 @@
 # along with scapy-uas-remoteid.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from datetime import datetime
 from scapy.packet import Packet
 from scapy.fields import (
     BitEnumField,
@@ -25,7 +24,6 @@ from scapy.fields import (
     ByteEnumField,
     ConditionalField,
     FieldLenField,
-    LEIntField,
     LEShortField,
     LESignedIntField,
     MultipleTypeField,
@@ -34,8 +32,9 @@ from scapy.fields import (
     SignedByteField,
     StrFixedLenField,
     UUIDField,
+    UTCTimeField,
 )
-from time import mktime
+from time import gmtime, time
 from typing import (
     Optional,
     Tuple,
@@ -167,14 +166,12 @@ class HorizontalSpeedField(ByteField):
         return super().h2i(pkt, value)
 
 
-class TimestampField(BaseNumericField, LEIntField):
-    @staticmethod
-    def _decode(data: int) -> datetime:
-        return datetime.fromtimestamp(data + 1546300800.0)
-
-    @staticmethod
-    def _encode(value: datetime) -> int:
-        return int(mktime(value.timetuple()) - 1546300800.0)
+class TimestampField(UTCTimeField):
+    def __init__(self, name: str, default: int = time()):
+        UTCTimeField.__init__(self, name, default,
+                              epoch=gmtime(1546300800),
+                              strf="%Y-%m-%d %H:%M:%S %Z",
+                              fmt="<I")
 
 
 class TimestampHourlyField(BaseNumericField, LEShortField):
@@ -488,7 +485,7 @@ class Authentication(OpenDroneIDPacket):
             lambda pkt: pkt.dataPage == 0
         ),
         ConditionalField(
-            TimestampField("timestamp", datetime.now()),
+            TimestampField("timestamp", time()),
             lambda pkt: pkt.dataPage == 0
         ),
         ConditionalField(
@@ -571,7 +568,7 @@ class System(OpenDroneIDPacket):
             lambda pkt: pkt.protoVersion >= 1
         ),
         ConditionalField(
-            TimestampField("timestamp", datetime.now()),
+            TimestampField("timestamp", time()),
             lambda pkt: pkt.protoVersion >= 1
         ),
         ConditionalField(
