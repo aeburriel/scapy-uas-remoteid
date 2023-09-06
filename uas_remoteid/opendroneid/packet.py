@@ -471,14 +471,13 @@ class Authentication(OpenDroneIDPacket):
             TimestampField("timestamp", time()),
             lambda pkt: pkt.dataPage == 0
         ),
-        ConditionalField(
-            StrFixedLenField("authData0", "", 17),
-            lambda pkt: pkt.dataPage == 0
-        ),
-
-        ConditionalField(
-            StrFixedLenField("authData", "", 23),
-            lambda pkt: pkt.dataPage > 0
+        MultipleTypeField(
+            [
+                (StrFixedLenField("authData", "", 17),
+                    lambda pkt: pkt.dataPage == 0
+                ),
+            ],
+            StrFixedLenField("authData", "", 23)
         )
     ]
 
