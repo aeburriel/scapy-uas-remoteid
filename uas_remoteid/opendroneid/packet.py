@@ -25,10 +25,10 @@ from scapy.fields import (
     ConditionalField,
     FieldLenField,
     LEShortField,
-    LESignedIntField,
     MultipleTypeField,
     PacketField,
     PacketListField,
+    ScalingField,
     SignedByteField,
     StrFixedLenField,
     UUIDField,
@@ -59,27 +59,16 @@ class BaseNumericField:
         return super().h2i(pkt, value)
 
 
-class AltitudeField(BaseNumericField, LEShortField):
-    @staticmethod
-    def _decode(altitudeByte: int) -> float:
-        return (altitudeByte * 0.5) - 1000.0
-
-    @staticmethod
-    def _encode(altitude: float) -> int:
-        return int(round((altitude + 1000.0) * 2.0))
+class AltitudeField(ScalingField):
+    def __init__(self, name: str, default: float):
+        ScalingField.__init__(self, name, default,
+                              scaling=0.5, offset=-1000.0, unit="m", fmt="<H")
 
 
-class DecimalDegreeField(BaseNumericField, LESignedIntField):
-    @staticmethod
-    def _decode(data: int) -> float:
-        return data * 1E-7
-
-    @staticmethod
-    def _encode(value: float) -> int:
-        return int(round(value * 1E7))
-
-    def __init__(self, name: str, default: Optional[float] = None):
-        BaseNumericField.__init__(self, name, default)
+class DecimalDegreeField(ScalingField):
+    def __init__(self, name: str, default: float):
+        ScalingField.__init__(self, name, default,
+                              scaling=1E-7, ndigits=10, unit="°", fmt="<i")
 
 
 class DirectionField(ByteField):
@@ -174,17 +163,10 @@ class TimestampField(UTCTimeField):
                               fmt="<I")
 
 
-class TimestampHourlyField(BaseNumericField, LEShortField):
-    @staticmethod
-    def _decode(data: int) -> float:
-        return data * 0.1
-
-    @staticmethod
-    def _encode(value: float) -> int:
-        if value == 0xffff:
-            return value
-
-        return int(round(value * 10.0))
+class TimestampHourlyField(ScalingField):
+    def __init__(self, name: str, default: float):
+        ScalingField.__init__(self, name, default,
+                              scaling=0.1, unit="s", fmt="<H")
 
 
 class VerticalSpeedField(BaseNumericField, SignedByteField):
@@ -459,7 +441,7 @@ class Location(OpenDroneIDPacket):
         BitEnumField("horizAccuracy", 0, 4, _LOCATION_HORIZONTAL_ACCURACY),
         BitEnumField("baroAccuracy", 0, 4, _LOCATION_VERTICAL_ACCURACY),
         BitEnumField("speedAccuracy", 0, 4, _LOCATION_SPEED_ACCURACY),
-        TimestampHourlyField("timeStamp", 0xffff),
+        TimestampHourlyField("timeStamp", b"\xff\xff"),
         BitField("reserved2", 0, 4),
         BitEnumField("tsaAccuracy", 0, 4, _LOCATION_TSA_ACCURACY),
         ByteField("reserved3", 0)
