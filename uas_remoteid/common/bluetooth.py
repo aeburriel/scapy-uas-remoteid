@@ -43,7 +43,7 @@ from typing import Optional
 class HCI_LE_Meta_Extended_Advertising_Report(Packet):
     name = "Extended Advertising Report"
     fields_desc = [
-        BitField("reserved", 0, 1),
+        BitField("reserved", 0, 9, tot_size=-2),
         BitEnumField("status", 0, 2, {
             0: "Complete",
             1: "Incomplete, more data to come",
@@ -54,8 +54,7 @@ class HCI_LE_Meta_Extended_Advertising_Report(Packet):
         BitField("scanResponse", 0, 1),
         BitField("directedAdvertising", 0, 1),
         BitField("scannableAdvertising", 0, 1),
-        BitField("connectableAdvertising", 0, 1),
-        BitField("reserved2", 0, 8),
+        BitField("connectableAdvertising", 0, 1, end_tot_size=-2),
         ByteEnumField("atype", 0, {
             0: "Public Device Address",
             1: "Random Device Address",
