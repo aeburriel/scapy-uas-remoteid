@@ -169,20 +169,10 @@ class TimestampHourlyField(ScalingField):
                               scaling=0.1, unit="s", fmt="<H")
 
 
-class VerticalSpeedField(BaseNumericField, SignedByteField):
-    @staticmethod
-    def _decode(speedByte: int) -> float:
-        return speedByte * 0.5
-
-    @staticmethod
-    def _encode(speed: float) -> int:
-        data = speed * 2.0
-        if data < -128.0:
-            return -128
-        elif data > 127.0:
-            return 127
-
-        return int(round(data))
+class VerticalSpeedField(ScalingField):
+    def __init__(self, name: str, default: float):
+        ScalingField.__init__(self, name, default,
+                              scaling=0.5, unit="m/s", fmt="b")
 
 
 # Constants
