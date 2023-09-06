@@ -213,6 +213,13 @@ _BASICID_ID_TYPE = {
     4: "Specific Session ID"
 }
 
+# https://www.icao.int/airnavigation/IATF/Pages/ASTM-Remote-ID.aspx
+_BASICID_SPECIFIC_SESSION_ID = {
+    0: "Reserved",
+    1: "IETF",
+    2: "ASTM",
+}
+
 _BASICID_UAS_TYPE = {
     0: "None",
     1: "Fixed Wing Aeroplane",
@@ -400,12 +407,16 @@ class BasicID(OpenDroneIDPacket):
         BitEnumField("idType", None, 4, _BASICID_ID_TYPE),
         BitEnumField("uasType", None, 4, _BASICID_UAS_TYPE),
 
+        ConditionalField(
+            ByteEnumField("ssi", 0, _BASICID_SPECIFIC_SESSION_ID),
+            lambda pkt: pkt.idType == 4
+        ),
         MultipleTypeField(
             [
-                (StrFixedLenField("uasId", "", 20),
-                    lambda pkt: pkt.idType != 3),
                 (UUIDField("uasId", None),
-                    lambda pkt: pkt.idType == 3)
+                    lambda pkt: pkt.idType == 3),
+                (StrFixedLenField("uasId", "", 19),
+                    lambda pkt: pkt.idType == 4),
             ],
             StrFixedLenField("uasId", "", length=20)
         ),
