@@ -267,8 +267,8 @@ _LOCATION_SPEED_ACCURACY = {
 }
 
 _LOCATION_SPEED_MULTIPLIER = {
-    0: "x0.25",
-    1: "x0.75"
+    0: "×0.25",
+    1: "×0.75"
 }
 
 _LOCATION_STATUS = {
