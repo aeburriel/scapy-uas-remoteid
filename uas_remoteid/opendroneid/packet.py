@@ -587,7 +587,7 @@ class MessagePack(OpenDroneIDPacket):
     ]
 
 
-class Bluetooth_OpenDroneID(Packet):
+class Legacy_OpenDroneID(Packet):
     name = "Bluetooth OpenDroneID"
     fields_desc = [
         ByteField("appCode", 0x0d),

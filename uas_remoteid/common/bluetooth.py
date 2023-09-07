@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with scapy-uas-remoteid.  If not, see <http://www.gnu.org/licenses/>.
 
-from ..opendroneid.packet import Bluetooth_OpenDroneID, OpenDroneIDPacket
+from ..opendroneid.packet import Legacy_OpenDroneID, OpenDroneIDPacket
 from scapy.layers.bluetooth import (
     EIR_Hdr,
     EIR_ServiceData16BitUUID,
@@ -126,12 +126,12 @@ bind_layers(HCI_Command_Hdr, HCI_Cmd_LE_Set_Extended_Advertising_Data,
             opcode=0x2037)
 bind_layers(HCI_Event_LE_Meta, HCI_LE_Meta_Extended_Advertising_Reports,
             event=0x0d)
-bind_layers(EIR_ServiceData16BitUUID, Bluetooth_OpenDroneID,
+bind_layers(EIR_ServiceData16BitUUID, Legacy_OpenDroneID,
             svc_uuid=0xfffa)
 
 
 def parse_hci(hci: HCI_Hdr) -> Optional[OpenDroneIDPacket]:
-    packet = hci.getlayer(Bluetooth_OpenDroneID)
+    packet = hci.getlayer(Legacy_OpenDroneID)
     if packet is None or packet.appCode != 0x0d:
         return None
 

@@ -17,6 +17,7 @@
 
 
 from ..opendroneid.packet import (
+    Legacy_OpenDroneID,
     OpenDroneIDPacket,
 )
 from scapy.fields import (
@@ -105,6 +106,6 @@ def parse_dot11(dot11: Dot11) -> Optional[OpenDroneIDPacket]:
                 packet.ID == 221
                 and packet.info[0:4] == b"\xfa\x0b\xbc\x0d"
             ):
-                return OpenDroneIDPacket(packet.info[5:])
+                return Legacy_OpenDroneID(packet.info[3:]).info
 
     return None
