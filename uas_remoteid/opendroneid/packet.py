@@ -29,7 +29,6 @@ from scapy.fields import (
     PacketField,
     PacketListField,
     ScalingField,
-    SignedByteField,
     StrFixedLenField,
     UUIDField,
     UTCTimeField,
