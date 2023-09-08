@@ -65,8 +65,5 @@ if __name__ == "__main__":
         bt5_ble_lr_extended_opendroneid_hci_received,
         bt4_legacy_extended_opendroneid_hci_received
     ]:
-        msg = parse_hci(HCI_Hdr(packet))
-        if msg is None:
-            print("Error: unable to parse")
-            continue
-        msg.show()
+        for msg in parse_hci(HCI_Hdr(packet)):
+            msg.show()

@@ -77,8 +77,5 @@ if __name__ == "__main__":
         wifi_frame_nan_opendroneid,
         wifi_frame_nan_real,
     ]:
-        msg = parse_dot11(Dot11(packet))
-        if msg is None:
-            print("Error: unable to parse")
-            continue
-        msg.show()
+        for msg in parse_dot11(Dot11(packet)):
+            msg.show()

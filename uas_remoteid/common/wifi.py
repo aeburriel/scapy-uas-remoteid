@@ -35,9 +35,7 @@ from scapy.layers.dot11 import (
     bind_layers,
 )
 from scapy.packet import Packet
-from typing import (
-    Optional,
-)
+from typing import Generator
 
 
 def attr_guess_payload(payload, **kargs):
@@ -90,22 +88,30 @@ class Dot11NAN_VendorSpecificPublicAction(Packet):
 bind_layers(Dot11, Dot11NAN_VendorSpecificPublicAction, subtype=13, type=0)
 
 
-def parse_dot11(dot11: Dot11) -> Optional[OpenDroneIDPacket]:
-    for packet in dot11.iterpayloads():
-        if isinstance(packet, Dot11NAN_VendorSpecificPublicAction):
+def parse_dot11(dot11: Dot11) -> Generator[OpenDroneIDPacket, None, None]:
+    if Dot11NAN_VendorSpecificPublicAction in dot11:
+        packet = dot11[Dot11NAN_VendorSpecificPublicAction]
+        while packet is not None:
             # 802.11 WIFI NAN Action
             for subpacket in packet.attrs:
                 if (
                     isinstance(subpacket, Dot11NAN_ServiceDescriptorAttribute)
                     and subpacket.serviceID == b"\x88\x69\x19\x9d\x92\x09"
                 ):
-                    return OpenDroneIDPacket(subpacket.info)
-        elif isinstance(packet, Dot11EltVendorSpecific):
+                    yield OpenDroneIDPacket(subpacket.info)
+
+            packet = packet.payload.getlayer(
+                Dot11NAN_VendorSpecificPublicAction
+            )
+    elif Dot11EltVendorSpecific in dot11:
+        packet = dot11[Dot11EltVendorSpecific]
+        while packet is not None:
             # 802.11 beacon
             if (
                 packet.ID == 221
-                and packet.info[0:4] == b"\xfa\x0b\xbc\x0d"
+                and packet.oui == 0xfa0bbc
+                and packet.info[3] == 0x0d
             ):
-                return Legacy_OpenDroneID(packet.info[3:]).info
+                yield Legacy_OpenDroneID(packet.info[3:]).info
 
-    return None
+            packet = packet.payload.getlayer(Dot11EltVendorSpecific)

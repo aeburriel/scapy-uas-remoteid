@@ -37,7 +37,7 @@ from scapy.fields import (
     SignedByteField,
 )
 from scapy.packet import Packet
-from typing import Optional
+from typing import Generator
 
 
 class HCI_LE_Meta_Extended_Advertising_Report(Packet):
@@ -130,9 +130,19 @@ bind_layers(EIR_ServiceData16BitUUID, Legacy_OpenDroneID,
             svc_uuid=0xfffa)
 
 
-def parse_hci(hci: HCI_Hdr) -> Optional[OpenDroneIDPacket]:
-    packet = hci.getlayer(Legacy_OpenDroneID)
-    if packet is None or packet.appCode != 0x0d:
-        return None
+def parse_hci(hci: HCI_Hdr) -> Generator[OpenDroneIDPacket, None, None]:
+    if HCI_LE_Meta_Extended_Advertising_Reports in hci:
+        # Extended Advertising Reports
+        for report in hci[HCI_LE_Meta_Extended_Advertising_Reports].reports:
+            for packet in report[Legacy_OpenDroneID]:
+                if packet.appCode == 0x0d:
+                    yield packet.info
+    elif Legacy_OpenDroneID in hci:
+        # Set Extended Advertising
+        # Set Advertising
+        packet = hci[Legacy_OpenDroneID]
+        while packet is not None:
+            if packet.appCode == 0x0d:
+                yield packet.info
 
-    return packet.info
+            packet = packet.payload.getlayer(Legacy_OpenDroneID)
