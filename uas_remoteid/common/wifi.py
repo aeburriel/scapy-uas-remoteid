@@ -16,6 +16,7 @@
 # along with scapy-uas-remoteid.  If not, see <http://www.gnu.org/licenses/>.
 
 
+from ..dji.packet import DJIPacket
 from ..opendroneid.packet import (
     Legacy_OpenDroneID,
     OpenDroneIDPacket,
@@ -107,11 +108,12 @@ def parse_dot11(dot11: Dot11) -> Generator[OpenDroneIDPacket, None, None]:
         packet = dot11[Dot11EltVendorSpecific]
         while packet is not None:
             # 802.11 beacon
-            if (
-                packet.ID == 221
-                and packet.oui == 0xfa0bbc
-                and packet.info[3] == 0x0d
-            ):
-                yield Legacy_OpenDroneID(packet.info[3:]).info
-
+            if packet.ID == 221:
+                if packet.oui == 0xfa0bbc and packet.info[3] == 0x0d:
+                    yield Legacy_OpenDroneID(packet.info[3:]).info
+                elif (
+                        packet.oui == 0x263712
+                        and packet.info[3:6] == b"\x58\x62\x13"
+                ):
+                    yield DJIPacket(packet.info[3:])
             packet = packet.payload.getlayer(Dot11EltVendorSpecific)
