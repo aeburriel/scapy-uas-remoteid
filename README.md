@@ -1,7 +1,8 @@
 # scapy-uas-remoteid
 This repository contains a Scapy dissector for the following UAS Remote ID protocols:
 * ASTM F3411 UAS Remote ID protocol.
-* DJI Remote ID
+* DJI Remote ID protocol.
+* French SGDSN (Secrétariat général de la Défense et de la Sécurité nationale) Remote ID protocol.
 
 It started as a training for the popular packet manipulation library Scapy <https://github.com/secdev/scapy> and is greatly influenced by Open Drone ID project <https://github.com/opendroneid/>.
 

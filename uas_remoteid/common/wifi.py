@@ -21,6 +21,7 @@ from ..opendroneid.packet import (
     Legacy_OpenDroneID,
     OpenDroneIDPacket,
 )
+from uas_remoteid.sgdsn.packet import SGDSNPacket
 from scapy.fields import (
     ByteField,
     LEShortField,
@@ -116,4 +117,7 @@ def parse_dot11(dot11: Dot11) -> Generator[OpenDroneIDPacket, None, None]:
                         and packet.info[3:6] == b"\x58\x62\x13"
                 ):
                     yield DJIPacket(packet.info[3:])
+                elif packet.oui == 0x6a5c35 and packet.info[3] == 0x01:
+                    yield SGDSNPacket(packet.info[3:])
+
             packet = packet.payload.getlayer(Dot11EltVendorSpecific)
